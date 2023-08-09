@@ -3,11 +3,14 @@ package com.hua.community.controller;
 import com.hua.community.dto.AccesstokenDTO;
 import com.hua.community.dto.GithubUser;
 import com.hua.community.provider.GithubProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.net.http.HttpRequest;
 
 @Controller
 public class AuthorizeController
@@ -25,15 +28,10 @@ public class AuthorizeController
 
     @GetMapping("/callback")
     public String callback(@RequestParam(name="code") String code,
-                           @RequestParam(name = "state") String state)
+                           @RequestParam(name = "state") String state,
+                           HttpServletRequest request)
     {
         AccesstokenDTO accesstokenDTO=new AccesstokenDTO();
-
-
-        System.out.println(c_id);
-        System.out.println(c_sc);
-        System.out.println(ur);
-
 
         accesstokenDTO.setClient_id(c_id);
         accesstokenDTO.setCode(code);
@@ -41,10 +39,16 @@ public class AuthorizeController
         accesstokenDTO.setRedirect_uri(ur);
         accesstokenDTO.setState(state);
         String accesstoken=githubProvider.getAccessTokenDTO(accesstokenDTO);
-        System.out.println(accesstoken);
         GithubUser user= githubProvider.getgithubUser(accesstoken);
-        System.out.println(user.getName());
-        return "index";
+        if (user != null){
+            //登录成功写cookie\
+            request.getSession().setAttribute("user",user);
+            return "redirect:/";    //地址不变，页面渲染成index
+        }
+        else {
+            //登录失败
+            return "redirect:/";
+        }
     }
 
 }
