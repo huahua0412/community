@@ -40,6 +40,8 @@ public class AuthorizeController
         accesstokenDTO.setState(state);
         String accesstoken=githubProvider.getAccessTokenDTO(accesstokenDTO);
         GithubUser user= githubProvider.getgithubUser(accesstoken);
+        System.out.println(accesstoken);
+        System.out.println(user.getName());
         if (user != null){
             //登录成功写cookie\
             request.getSession().setAttribute("user",user);
