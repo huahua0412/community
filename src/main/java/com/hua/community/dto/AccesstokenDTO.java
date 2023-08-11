@@ -1,7 +1,6 @@
 package com.hua.community.dto;
 
-public class AccesstokenDTO
-{
+public class AccesstokenDTO {
     private String client_id;
     private String client_secret;
     private String code;
