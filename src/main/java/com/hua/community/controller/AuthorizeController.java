@@ -5,7 +5,9 @@ import com.hua.community.dto.GithubUser;
 import com.hua.community.mapper.UserMapper;
 import com.hua.community.model.MyUser;
 import com.hua.community.provider.GithubProvider;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -32,7 +34,7 @@ public class AuthorizeController {
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
                            @RequestParam(name = "state") String state,
-                           HttpServletRequest request) {
+                           HttpServletResponse response) {
         AccesstokenDTO accesstokenDTO = new AccesstokenDTO();
 
         accesstokenDTO.setClient_id(c_id);
@@ -47,14 +49,15 @@ public class AuthorizeController {
         if (githubUser != null) {
             //登录成功写cookie
             MyUser user = new MyUser();
-            user.setToken(UUID.randomUUID().toString());
+            String token = UUID.randomUUID().toString();
+            user.setToken(token);
             user.setName(githubUser.getName());
             user.setAccountid(String.valueOf(githubUser.getId()));
             user.setGmtcreate(System.currentTimeMillis());
             user.setGmtmodified(user.getGmtcreate());
             userMapper.insert(user);
-            request.getSession().setAttribute("user", githubUser);
-            return "redirect:/";    //地址不变，页面渲染成index
+            response.addCookie(new Cookie("token",token));
+            return "redirect:/";
         } else {
             //登录失败
             return "redirect:/";
